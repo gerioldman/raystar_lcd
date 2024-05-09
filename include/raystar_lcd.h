@@ -29,7 +29,13 @@ typedef enum
  * @brief Initialize LCD
  *
  */
-void LCD_Init();
+void LCD_Init(void);
+
+/**
+ * @brief Sends display off command, turns off enable pin and sets reset pin
+ * 
+ */
+void LCD_DeInit(void);
 
 /**
  * @brief Fill the display with the given pattern
@@ -49,7 +55,7 @@ void LCD_Fill_Buffer(uint8_t value);
  * @brief Writes the content of the buffer to the LCD screen
  *
  */
-void LCD_Invalidate();
+void LCD_Invalidate(void);
 
 /**
  * @brief Writes a pixel in the buffer

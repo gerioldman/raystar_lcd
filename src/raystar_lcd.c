@@ -11,9 +11,6 @@
 
 /* Private macros ------------------------------------------------------------*/
 
-#define LCD_PIXEL_SET 1
-#define LCD_PIXEL_RESET 0
-#define LCD_HEIGHT 64
 #define LCD_WIDTH 128
 #define LCD_COMMAND_DISPLAY_ON 0x3F
 #define LCD_COMMAND_DISPLAY_OFF 0x3E
@@ -30,7 +27,7 @@ static uint8_t buffer_right[8][64];
 /* Local function declarations -----------------------------------------------*/
 
 static void LCD_Write(uint8_t value, LCD_HWI_CS_Lines_State CSState, LCD_HWI_Instruction_Data_State DIState);
-static void LCD_Data_Latch();
+static void LCD_Data_Latch(void);
 
 /* Local function definitions ------------------------------------------------*/
 
@@ -42,7 +39,7 @@ static void LCD_Write(uint8_t value, LCD_HWI_CS_Lines_State CSState, LCD_HWI_Ins
 	LCD_Data_Latch();
 	LCD_HWI_SetCSLines(LCD_HWI_CS_OFF);
 }
-static void LCD_Data_Latch()
+static void LCD_Data_Latch(void)
 {
 	LCD_HWI_Delay(1);
 	LCD_HWI_SetLatch(LCD_HWI_Latch_OFF);
@@ -53,7 +50,7 @@ static void LCD_Data_Latch()
 
 /* Global function definitions -----------------------------------------------*/
 
-void LCD_Init()
+void LCD_Init(void)
 {
 	LCD_HWI_SetEnable(LCD_HWI_Enable_OFF);
 	LCD_HWI_SetLatch(LCD_HWI_Latch_ON);
@@ -68,6 +65,13 @@ void LCD_Init()
 	LCD_Write(LCD_SETYADDRESS, LCD_HWI_CS12, LCD_HWI_DI_Instruction);
 	LCD_Write(LCD_SETPAGE, LCD_HWI_CS12, LCD_HWI_DI_Instruction);
 	LCD_Write(LCD_DISPLAY_START_LINE, LCD_HWI_CS12, LCD_HWI_DI_Instruction);
+}
+
+void LCD_DeInit(void)
+{
+	LCD_HWI_SetEnable(LCD_HWI_Enable_OFF);
+	LCD_Write(LCD_COMMAND_DISPLAY_OFF, LCD_HWI_CS12, LCD_HWI_DI_Instruction);
+	LCD_HWI_SetReset(LCD_HWI_RST_ON);
 }
 
 void LCD_Fill_Display(uint8_t value)
@@ -91,9 +95,9 @@ void LCD_Write_BufferPixel(Pixel_State pixel, int16_t x, int16_t y)
 		{
 
 			if (pixel)
-				buffer_left[y >> 3][x] |= (1 << (y % 8)); // Set bit
+				buffer_left[y >> 3u][x] |= (uint8_t)(1u << (y % 8)); // Set bit
 			else
-				buffer_left[y >> 3][x] &= ~(1 << (y % 8)); // Clear bit
+				buffer_left[y >> 3u][x] &= (uint8_t)~(1u << (y % 8)); // Clear bit
 		}
 	}
 	// Right side
@@ -102,13 +106,13 @@ void LCD_Write_BufferPixel(Pixel_State pixel, int16_t x, int16_t y)
 		if (y < 64 && y >= 0)
 		{
 			if (pixel)
-				buffer_right[y >> 3][x - 64] |= (1 << (y % 8)); // Set bit
+				buffer_right[y >> 3u][x - 64] |= (uint8_t)(1u << (y % 8)); // Set bit
 			else
-				buffer_right[y >> 3][x - 64] &= ~(1 << (y % 8)); // Clear bit
+				buffer_right[y >> 3u][x - 64] &= (uint8_t)~(1u << (y % 8)); // Clear bit
 		}
 	}
 }
-void LCD_Invalidate()
+void LCD_Invalidate(void)
 {
 	for (uint8_t p = 0; p < LCD_PAGE_NUMBER; p++)
 	{
